@@ -102,83 +102,101 @@ public class AplikasiPerpuluhanPerbendaharaan {
         System.out.println("Total Persembahan: " + totalPersembahan);
     }
 
+    public static void tampilkanMenu() {
+        System.out.println("\n=== Aplikasi Perpuluhan dan Perbendaharaan Jemaat ===");
+        System.out.println("1. Tambah Jemaat");
+        System.out.println("2. Hitung Perpuluhan");
+        System.out.println("3. Input Persembahan");
+        System.out.println("4. Hitung Perbendaharaan");
+        System.out.println("5. Tampilkan Data Jemaat");
+        System.out.println("6. Tampilkan Perbendaharaan");
+        System.out.println("7. Update Data Jemaat");
+        System.out.println("8. Hapus Data Jemaat");
+        System.out.println("9. Cari Jemaat");
+        System.out.println("10. Rekapitulasi Persembahan");
+        System.out.println("11. Keluar");
+        System.out.print("Pilih menu: ");
+    }
+
+    public static void prosesTambahJemaat() {
+        System.out.print("Masukkan nama jemaat: ");
+        String nama = scanner.nextLine();
+        System.out.print("Masukkan alamat jemaat: ");
+        String alamat = scanner.nextLine();
+        simpanDataJemaat(nama, alamat);
+    }
+
+    public static void prosesHitungPerpuluhan() {
+        List<String> jemaatList = readFromCSV(JEMAAT_FILE);
+        if (jemaatList.isEmpty()) {
+            System.out.println("Belum ada data jemaat.");
+        } else {
+            System.out.println("Pilih jemaat:");
+            for (int i = 0; i < jemaatList.size(); i++) {
+                System.out.println((i + 1) + ". " + jemaatList.get(i));
+            }
+            int jemaatIndex = scanner.nextInt() - 1;
+            scanner.nextLine();
+            if (jemaatIndex >= 0 && jemaatIndex < jemaatList.size()) {
+                System.out.print("Masukkan gaji bulan ini: ");
+                double gajiBulan = scanner.nextDouble();
+                hitungPerpuluhan(jemaatList.get(jemaatIndex).split(",")[0], gajiBulan);
+            }
+        }
+    }
+
+    public static void prosesInputPersembahan() {
+        System.out.print("Masukkan jumlah persembahan: ");
+        double persembahan = scanner.nextDouble();
+        hitungPersembahan(persembahan);
+    }
+
+    public static void prosesHitungPerbendaharaan() {
+        System.out.print("Masukkan jumlah kas sebelumnya: ");
+        double kasSebelumnya = scanner.nextDouble();
+        System.out.print("Masukkan jumlah pengeluaran: ");
+        double pengeluaran = scanner.nextDouble();
+        hitungPerbendaharaan(kasSebelumnya, pengeluaran);
+    }
+
+    public static void prosesUpdateDataJemaat() {
+        System.out.print("Masukkan nama jemaat yang akan diupdate: ");
+        String namaLama = scanner.nextLine();
+        System.out.print("Masukkan nama baru: ");
+        String namaBaru = scanner.nextLine();
+        System.out.print("Masukkan alamat baru: ");
+        String alamatBaru = scanner.nextLine();
+        updateDataJemaat(namaLama, namaBaru, alamatBaru);
+    }
+
+    public static void prosesHapusDataJemaat() {
+        System.out.print("Masukkan nama jemaat yang akan dihapus: ");
+        String namaHapus = scanner.nextLine();
+        hapusDataJemaat(namaHapus);
+    }
+
+    public static void prosesCariJemaat() {
+        System.out.print("Masukkan nama jemaat yang dicari: ");
+        String namaCari = scanner.nextLine();
+        cariJemaat(namaCari);
+    }
+
     public static void main(String[] args) {
         while (true) {
-            System.out.println("\n=== Aplikasi Perpuluhan dan Perbendaharaan Jemaat ===");
-            System.out.println("1. Tambah Jemaat");
-            System.out.println("2. Hitung Perpuluhan");
-            System.out.println("3. Input Persembahan");
-            System.out.println("4. Hitung Perbendaharaan");
-            System.out.println("5. Tampilkan Data Jemaat");
-            System.out.println("6. Tampilkan Perbendaharaan");
-            System.out.println("7. Update Data Jemaat");
-            System.out.println("8. Hapus Data Jemaat");
-            System.out.println("9. Cari Jemaat");
-            System.out.println("10. Rekapitulasi Persembahan");
-            System.out.println("11. Keluar");
-            System.out.print("Pilih menu: ");
+            tampilkanMenu();
             int pilihan = scanner.nextInt();
             scanner.nextLine();
 
             switch (pilihan) {
-                case 1 -> {
-                    System.out.print("Masukkan nama jemaat: ");
-                    String nama = scanner.nextLine();
-                    System.out.print("Masukkan alamat jemaat: ");
-                    String alamat = scanner.nextLine();
-                    simpanDataJemaat(nama, alamat);
-                }
-                case 2 -> {
-                    List<String> jemaatList = readFromCSV(JEMAAT_FILE);
-                    if (jemaatList.isEmpty()) {
-                        System.out.println("Belum ada data jemaat.");
-                    } else {
-                        System.out.println("Pilih jemaat:");
-                        for (int i = 0; i < jemaatList.size(); i++) {
-                            System.out.println((i + 1) + ". " + jemaatList.get(i));
-                        }
-                        int jemaatIndex = scanner.nextInt() - 1;
-                        scanner.nextLine();
-                        if (jemaatIndex >= 0 && jemaatIndex < jemaatList.size()) {
-                            System.out.print("Masukkan gaji bulan ini: ");
-                            double gajiBulan = scanner.nextDouble();
-                            hitungPerpuluhan(jemaatList.get(jemaatIndex).split(",")[0], gajiBulan);
-                        }
-                    }
-                }
-                case 3 -> {
-                    System.out.print("Masukkan jumlah persembahan: ");
-                    double persembahan = scanner.nextDouble();
-                    hitungPersembahan(persembahan);
-                }
-                case 4 -> {
-                    System.out.print("Masukkan jumlah kas sebelumnya: ");
-                    double kasSebelumnya = scanner.nextDouble();
-                    System.out.print("Masukkan jumlah pengeluaran: ");
-                    double pengeluaran = scanner.nextDouble();
-                    hitungPerbendaharaan(kasSebelumnya, pengeluaran);
-                }
+                case 1 -> prosesTambahJemaat();
+                case 2 -> prosesHitungPerpuluhan();
+                case 3 -> prosesInputPersembahan();
+                case 4 -> prosesHitungPerbendaharaan();
                 case 5 -> tampilkanDataCSV(JEMAAT_FILE);
                 case 6 -> tampilkanDataCSV(PERBENDAHARAAN_FILE);
-                case 7 -> {
-                    System.out.print("Masukkan nama jemaat yang akan diupdate: ");
-                    String namaLama = scanner.nextLine();
-                    System.out.print("Masukkan nama baru: ");
-                    String namaBaru = scanner.nextLine();
-                    System.out.print("Masukkan alamat baru: ");
-                    String alamatBaru = scanner.nextLine();
-                    updateDataJemaat(namaLama, namaBaru, alamatBaru);
-                }
-                case 8 -> {
-                    System.out.print("Masukkan nama jemaat yang akan dihapus: ");
-                    String namaHapus = scanner.nextLine();
-                    hapusDataJemaat(namaHapus);
-                }
-                case 9 -> {
-                    System.out.print("Masukkan nama jemaat yang dicari: ");
-                    String namaCari = scanner.nextLine();
-                    cariJemaat(namaCari);
-                }
+                case 7 -> prosesUpdateDataJemaat();
+                case 8 -> prosesHapusDataJemaat();
+                case 9 -> prosesCariJemaat();
                 case 10 -> rekapitulasiPersembahan();
                 case 11 -> {
                     System.out.println("Keluar dari aplikasi.");
