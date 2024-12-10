@@ -1,66 +1,39 @@
 package service;
 
-import java.io.*;
-import java.util.ArrayList;
+import entities.Jemaat;
+import repositories.IJemaatRepository;
 import java.util.List;
 
-public class JemaatService implements IJemaatService {
-    private static final String JEMAAT_FILE = "jemaat.csv";
+public class JemaatService implements services.IJemaatService {
+    private final IJemaatRepository jemaatRepository;
 
-    @Override
-    public void simpanDataJemaat(String nama, String alamat) {
-        try (FileWriter writer = new FileWriter(JEMAAT_FILE, true)) {
-            writer.write(nama + "," + alamat + "\n");
-        } catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat menyimpan data jemaat.");
-        }
+    public JemaatService(IJemaatRepository jemaatRepository) {
+        this.jemaatRepository = jemaatRepository;
     }
 
     @Override
-    public void tampilkanDataJemaat() {
-        List<String> data = bacaDataDariFile(JEMAAT_FILE);
-        if (data.isEmpty()) {
-            System.out.println("Tidak ada data jemaat.");
-        } else {
-            data.forEach(System.out::println);
-        }
+    public void tambahJemaat(Jemaat jemaat) {
+        jemaatRepository.tambahData(jemaat);
     }
 
     @Override
-    public void hapusDataJemaat(String nama) {
-        List<String> jemaatList = bacaDataDariFile(JEMAAT_FILE);
-        jemaatList.removeIf(jemaat -> jemaat.split(",")[0].equals(nama));
-        tulisDataKeFile(JEMAAT_FILE, jemaatList, false);
+    public List<Jemaat> tampilkanJemaat() {
+        return jemaatRepository.bacaData();
     }
 
     @Override
-    public void cariJemaat(String nama) {
-        List<String> jemaatList = bacaDataDariFile(JEMAAT_FILE);
-        jemaatList.stream()
-                .filter(jemaat -> jemaat.split(",")[0].equalsIgnoreCase(nama))
-                .forEach(System.out::println);
+    public void hitungPerpuluhan(String nama, double gaji) {
+        double perpuluhan = gaji * 0.1;
+        System.out.println("Perpuluhan untuk " + nama + ": " + perpuluhan);
     }
 
-    private List<String> bacaDataDariFile(String fileName) {
-        List<String> data = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                data.add(line);
-            }
-        } catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat membaca file: " + fileName);
-        }
-        return data;
+    @Override
+    public void updateJemaat(String namaLama, Jemaat jemaatBaru) {
+        jemaatRepository.updateData(namaLama, jemaatBaru);
     }
 
-    private void tulisDataKeFile(String fileName, List<String> data, boolean append) {
-        try (FileWriter writer = new FileWriter(fileName, append)) {
-            for (String line : data) {
-                writer.write(line + "\n");
-            }
-        } catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat menulis ke file: " + fileName);
-        }
+    @Override
+    public void hapusJemaat(String nama) {
+        jemaatRepository.hapusData(nama);
     }
 }
