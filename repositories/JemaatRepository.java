@@ -1,65 +1,92 @@
 package repositories;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import entities.Jemaat;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JemaatRepository implements IJemaatRepository {
-    private IFileRepository fileRepository;
+    private static final String JEMAAT_FILE = "jemaat.csv";
 
-    public JemaatRepository(IFileRepository fileRepository) {
-        this.fileRepository = fileRepository;
-    }
-
+    // Menyimpan data jemaat ke dalam file CSV
     @Override
-    public void saveJemaat(String nama, String alamat) {
-        fileRepository.writeToCSV("jemaat.csv", nama + "," + alamat, true);
-    }
-
-    @Override
-    public void updateJemaat(String namaLama, String namaBaru, String alamatBaru) {
-        List<String> jemaatList = fileRepository.readFromCSV("jemaat.csv");
-        List<String> updatedList = new ArrayList<>();
-        jemaatList.forEach(jemaat -> {
-            String[] parts = jemaat.split(",");
-            if (parts[0].equals(namaLama)) {
-                updatedList.add(namaBaru + "," + alamatBaru);
-            } else {
-                updatedList.add(jemaat);
-            }
-        });
-        writeListToFile(updatedList);
-    }
-
-    @Override
-    public void deleteJemaat(String nama) {
-        List<String> jemaatList = fileRepository.readFromCSV("jemaat.csv");
-        jemaatList.removeIf(jemaat -> jemaat.split(",")[0].equals(nama));
-        writeListToFile(jemaatList);
-    }
-
-    @Override
-    public List<String> getAllJemaat() {
-        return fileRepository.readFromCSV("jemaat.csv");
-    }
-
-    @Override
-    public void cariJemaat(String nama) {
-        List<String> jemaatList = fileRepository.readFromCSV("jemaat.csv");
-        jemaatList.stream()
-                .filter(jemaat -> jemaat.split(",")[0].equalsIgnoreCase(nama))
-                .forEach(System.out::println);
-    }
-
-    // Method untuk menulis ulang daftar jemaat ke file
-    private void writeListToFile(List<String> jemaatList) {
-        try (FileWriter writer = new FileWriter("jemaat.csv")) {
-            for (String jemaat : jemaatList) {
-                writer.write(jemaat + "\n");
+    public void simpanData(List<Jemaat> jemaatList) {
+        try (FileWriter writer = new FileWriter(JEMAAT_FILE, false)) {
+            // Menulis setiap jemaat ke dalam file CSV
+            for (Jemaat jemaat : jemaatList) {
+                writer.write(jemaat.getNama() + "," + jemaat.getAlamat() + "\n");
             }
         } catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat menulis ulang data jemaat ke file.");
+            System.out.println("Terjadi kesalahan saat menyimpan data jemaat.");
+            e.printStackTrace();
+        }
+    }
+
+    // Membaca data jemaat dari file CSV
+    @Override
+    public List<Jemaat> bacaData() {
+        List<Jemaat> jemaatList = new ArrayList<>();
+        File file = new File(JEMAAT_FILE);
+
+        // Mengecek apakah file kosong
+        if (file.exists() && file.length() > 0) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(JEMAAT_FILE))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] data = line.split(",");
+                    if (data.length == 2) { // Pastikan data valid (nama dan alamat)
+                        jemaatList.add(new Jemaat(data[0], data[1]));
+                    }
+                }
+            } catch (IOException e) {
+                System.out.println("Terjadi kesalahan saat membaca data jemaat.");
+                e.printStackTrace();
+            }
+        }
+        return jemaatList;
+    }
+
+    // Menambahkan data jemaat baru
+    @Override
+    public void tambahData(Jemaat jemaat) {
+        List<Jemaat> jemaatList = bacaData();
+        jemaatList.add(jemaat);
+        simpanData(jemaatList);
+    }
+
+    // Memperbarui data jemaat berdasarkan nama lama
+    @Override
+    public void updateData(String namaLama, Jemaat jemaatBaru) {
+        List<Jemaat> jemaatList = bacaData();
+        boolean ditemukan = false;
+
+        // Mencari jemaat berdasarkan nama lama dan mengganti dengan jemaat baru
+        for (int i = 0; i < jemaatList.size(); i++) {
+            if (jemaatList.get(i).getNama().equals(namaLama)) {
+                jemaatList.set(i, jemaatBaru);
+                ditemukan = true;
+                break;
+            }
+        }
+
+        // Jika ditemukan, simpan data kembali
+        if (ditemukan) {
+            simpanData(jemaatList);
+        } else {
+            System.out.println("Jemaat dengan nama " + namaLama + " tidak ditemukan.");
+        }
+    }
+
+    // Menghapus data jemaat berdasarkan nama
+    @Override
+    public void hapusData(String nama) {
+        List<Jemaat> jemaatList = bacaData();
+        boolean ditemukan = jemaatList.removeIf(jemaat -> jemaat.getNama().equals(nama));
+
+        if (ditemukan) {
+            simpanData(jemaatList);
+        } else {
+            System.out.println("Jemaat dengan nama " + nama + " tidak ditemukan.");
         }
     }
 }
