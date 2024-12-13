@@ -1,39 +1,24 @@
-package service;
-
-import entities.Jemaat;
-import repositories.IJemaatRepository;
 import java.util.List;
 
-public class JemaatService implements services.IJemaatService {
-    private final IJemaatRepository jemaatRepository;
+public interface JemaatService {
 
-    public JemaatService(IJemaatRepository jemaatRepository) {
-        this.jemaatRepository = jemaatRepository;
-    }
+    void tambahJemaat(String nama, String alamat);
 
-    @Override
-    public void tambahJemaat(Jemaat jemaat) {
-        jemaatRepository.tambahData(jemaat);
-    }
+    void hitungPerpuluhan(String nama, double gaji);
 
-    @Override
-    public List<Jemaat> tampilkanJemaat() {
-        return jemaatRepository.bacaData();
-    }
+    void catatPersembahan(double persembahan);
 
-    @Override
-    public void hitungPerpuluhan(String nama, double gaji) {
-        double perpuluhan = gaji * 0.1;
-        System.out.println("Perpuluhan untuk " + nama + ": " + perpuluhan);
-    }
+    void hitungSaldoPerbendaharaan(double kasSebelumnya, double pengeluaran);
 
-    @Override
-    public void updateJemaat(String namaLama, Jemaat jemaatBaru) {
-        jemaatRepository.updateData(namaLama, jemaatBaru);
-    }
+    List<String> tampilkanJemaat();
 
-    @Override
-    public void hapusJemaat(String nama) {
-        jemaatRepository.hapusData(nama);
-    }
+    List<String> tampilkanPerbendaharaan();
+
+    void updateJemaat(String namaLama, String namaBaru, String alamatBaru);
+
+    void hapusJemaat(String nama);
+
+    List<String> cariJemaat(String nama);
+
+    void rekapitulasiPersembahan();
 }
