@@ -2,21 +2,19 @@ package entity;
 
 public class Entities {
 
-    // Entity Jemaat
     public static class Jemaat {
-        private int id; // Menyesuaikan dengan tabel database
+        private int id;
         private String nama;
         private String alamat;
         private double perpuluhan;
 
-        // Konstruktor tanpa ID untuk penambahan baru
         public Jemaat(String nama, String alamat) {
+            this.id = 0;  // Default value for id
             this.nama = nama;
             this.alamat = alamat;
-            this.perpuluhan = 0.0; // Default nilai perpuluhan
+            this.perpuluhan = 0.0;  // Default value for perpuluhan
         }
 
-        // Konstruktor dengan ID untuk membaca data dari database
         public Jemaat(int id, String nama, String alamat, double perpuluhan) {
             this.id = id;
             this.nama = nama;
@@ -56,18 +54,17 @@ public class Entities {
             if (gaji < 0) {
                 throw new IllegalArgumentException("Gaji tidak boleh negatif.");
             }
-            this.perpuluhan = gaji * 0.1; // Menghitung perpuluhan
+            this.perpuluhan = gaji * 0.1;
         }
 
         @Override
         public String toString() {
-            return id + "," + nama + "," + alamat + "," + perpuluhan;
+            return "ID: " + id + ", Nama: " + nama + ", Alamat: " + alamat + ", Perpuluhan: " + perpuluhan;
         }
     }
 
-    // Entity Persembahan
     public static class Persembahan {
-        private int id; // Menyesuaikan dengan tabel database
+        private int id;
         private double jumlah;
 
         public Persembahan(double jumlah) {
@@ -97,11 +94,10 @@ public class Entities {
 
         @Override
         public String toString() {
-            return id + "," + jumlah;
+            return "ID: " + id + ", Jumlah: " + jumlah;
         }
     }
 
-    // Entity Perbendaharaan
     public static class Perbendaharaan {
         private int id; // Menyesuaikan dengan tabel database
         private double kasSebelumnya;
@@ -155,7 +151,7 @@ public class Entities {
 
         @Override
         public String toString() {
-            return id + "," + kasSebelumnya + "," + totalKas + "," + pengeluaran;
+            return "ID: " + id + ", Kas Sebelumnya: " + kasSebelumnya + ", Total Kas: " + totalKas + ", Pengeluaran: " + pengeluaran;
         }
     }
 }

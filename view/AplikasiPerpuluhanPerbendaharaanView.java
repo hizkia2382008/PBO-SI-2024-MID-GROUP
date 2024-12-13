@@ -1,14 +1,22 @@
 package view;
 
+import entity.Entities.Jemaat;
 import java.util.List;
 
 public interface AplikasiPerpuluhanPerbendaharaanView {
     void tampilkanMenu();
-    void tampilkanJemaat(List<String> jemaatList);
+
+    void tampilkanJemaat(List<Jemaat> jemaatList);
+
     void tampilkanPerbendaharaan(List<String> perbendaharaanList);
+
     void tampilkanPesan(String message);
+
     void tampilkanRekapitulasiPersembahan(double totalPersembahan);
 
-    // Menambahkan metode untuk memproses interaksi menu
-    void prosesMenu();  // Proses menu yang diterima dari pengguna
+    void prosesMenu();
+
+    String getInput();
+
+    double getInputDouble();
 }

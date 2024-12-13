@@ -1,12 +1,12 @@
-import repositories.JemaatRepository;
-import service.JemaatService;
-import views.JemaatView;
+import repository.JemaatRepositoryImpl;
+import service.JemaatServiceImpl;
+import view.AplikasiPerpuluhanPerbendaharaanViewImpl;
 
 public class Main {
     public static void main(String[] args) {
-        JemaatRepository jemaatRepository = new JemaatRepository();
-        JemaatService jemaatService = new JemaatService(jemaatRepository);
-        JemaatView jemaatView = new JemaatView(jemaatService);
-        jemaatView.tampilkanMenu();
+        JemaatRepositoryImpl jemaatRepository = new JemaatRepositoryImpl();
+        JemaatServiceImpl jemaatService = new JemaatServiceImpl(jemaatRepository);
+        AplikasiPerpuluhanPerbendaharaanViewImpl jemaatView = new AplikasiPerpuluhanPerbendaharaanViewImpl();
+        jemaatView.prosesMenu();
     }
 }
