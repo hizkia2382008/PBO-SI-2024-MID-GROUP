@@ -1,166 +1,255 @@
 package repository;
 
+import config.Database;
 import entity.Entities.Jemaat;
-import repository.JemaatRepository;
+import entity.Entities.Persembahan;
+import entity.Entities.Perbendaharaan;
 
-import java.io.*;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class JemaatRepositoryImpl implements JemaatRepository {
 
-    private static final String FILE_PATH = "jemaat.csv";
+    private final Database database;
 
-    private void ensureFileExists() {
-        File file = new File(FILE_PATH);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                System.err.println("Error creating file: " + e.getMessage());
-            }
-        }
+    public JemaatRepositoryImpl(Database database) {
+        this.database = database;
     }
 
     @Override
-    public void save(Jemaat jemaat) {
-        ensureFileExists();
-        try (FileWriter writer = new FileWriter(FILE_PATH, true)) {
-            writer.write(jemaat.getId() + "," + jemaat.getNama() + "," + jemaat.getAlamat() + "," + jemaat.getPerpuluhan() + "\n");
-        } catch (IOException e) {
-            System.err.println("Error saving jemaat: " + e.getMessage());
+    public List<Jemaat> getAllJemaat() {
+        List<Jemaat> jemaatList = new ArrayList<>();
+        String query = "SELECT * FROM jemaat";
+
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                jemaatList.add(new Jemaat(
+                        rs.getInt("id"),
+                        rs.getString("nama"),
+                        rs.getString("alamat"),
+                        rs.getDouble("perpuluhan")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching all jemaat: " + e.getMessage());
         }
+        return jemaatList;
     }
 
     @Override
-    public void update(Jemaat jemaat) {
-        List<Jemaat> jemaats = findAll();
-        boolean updated = false;
-        List<Jemaat> updatedJemaats = new ArrayList<>();
-
-        for (Jemaat j : jemaats) {
-            if (j.getId() == jemaat.getId()) {
-                updatedJemaats.add(jemaat);
-                updated = true;
-            } else {
-                updatedJemaats.add(j);
-            }
-        }
-
-        if (updated) {
-            try (FileWriter writer = new FileWriter(FILE_PATH)) {
-                for (Jemaat j : updatedJemaats) {
-                    writer.write(j.getId() + "," + j.getNama() + "," + j.getAlamat() + "," + j.getPerpuluhan() + "\n");
-                }
-            } catch (IOException e) {
-                System.err.println("Error updating jemaat with ID " + jemaat.getId() + ": " + e.getMessage());
-            }
-        } else {
-            System.err.println("Jemaat with ID " + jemaat.getId() + " not found.");
-        }
+    public Optional<Jemaat> findJemaatById(String id) {
+        return Optional.empty();
     }
 
     @Override
-    public void deleteById(int id) {
-        List<Jemaat> jemaats = findAll();
-        List<Jemaat> updatedJemaats = new ArrayList<>();
-        boolean found = false;
+    public Optional<Jemaat> findJemaatById(int id) {
+        String query = "SELECT * FROM jemaat WHERE id = ?";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
 
-        for (Jemaat j : jemaats) {
-            if (j.getId() != id) {
-                updatedJemaats.add(j);
-            } else {
-                found = true;
-            }
-        }
-
-        if (found) {
-            try (FileWriter writer = new FileWriter(FILE_PATH)) {
-                for (Jemaat j : updatedJemaats) {
-                    writer.write(j.getId() + "," + j.getNama() + "," + j.getAlamat() + "," + j.getPerpuluhan() + "\n");
-                }
-            } catch (IOException e) {
-                System.err.println("Error deleting jemaat with ID " + id + ": " + e.getMessage());
-            }
-        } else {
-            System.err.println("Jemaat with ID " + id + " not found.");
-        }
-    }
-
-    @Override
-    public Jemaat findById(int id) {
-        List<Jemaat> jemaats = findAll();
-        for (Jemaat jemaat : jemaats) {
-            if (jemaat.getId() == id) {
-                return jemaat;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public List<Jemaat> findAll() {
-        List<Jemaat> jemaats = new ArrayList<>();
-        ensureFileExists();
-        try (BufferedReader reader = new BufferedReader(new FileReader(FILE_PATH))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                if (parts.length == 4) {
-                    try {
-                        int id = Integer.parseInt(parts[0]);
-                        String nama = parts[1];
-                        String alamat = parts[2];
-                        double perpuluhan = Double.parseDouble(parts[3]);
-                        jemaats.add(new Jemaat(id, nama, alamat, perpuluhan));
-                    } catch (NumberFormatException e) {
-                        System.err.println("Skipping invalid line: " + line);
-                    }
-                } else {
-                    System.err.println("Skipping malformed line: " + line);
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(new Jemaat(
+                            rs.getInt("id"),
+                            rs.getString("nama"),
+                            rs.getString("alamat"),
+                            rs.getDouble("perpuluhan")
+                    ));
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Error reading jemaat data from file: " + e.getMessage());
+        } catch (SQLException e) {
+            System.err.println("Error fetching jemaat by ID: " + e.getMessage());
         }
-        return jemaats;
+        return Optional.empty();
     }
 
     @Override
-    public Jemaat findByName(String namaCari) {
-        List<Jemaat> jemaats = findAll();
-        for (Jemaat jemaat : jemaats) {
-            if (jemaat.getNama().equalsIgnoreCase(namaCari)) {
-                return jemaat;
-            }
-        }
-        return null;
-    }
+    public Optional<Jemaat> findJemaatByName(String nama) {
+        String query = "SELECT * FROM jemaat WHERE nama = ?";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
 
-    @Override
-    public void deleteByName(String namaHapus) {
-        List<Jemaat> jemaats = findAll();
-        List<Jemaat> updatedJemaats = new ArrayList<>();
-        boolean found = false;
-
-        for (Jemaat j : jemaats) {
-            if (!j.getNama().equalsIgnoreCase(namaHapus)) {
-                updatedJemaats.add(j);
-            } else {
-                found = true;
-            }
-        }
-
-        if (found) {
-            try (FileWriter writer = new FileWriter(FILE_PATH)) {
-                for (Jemaat j : updatedJemaats) {
-                    writer.write(j.getId() + "," + j.getNama() + "," + j.getAlamat() + "," + j.getPerpuluhan() + "\n");
+            ps.setString(1, nama);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(new Jemaat(
+                            rs.getInt("id"),
+                            rs.getString("nama"),
+                            rs.getString("alamat"),
+                            rs.getDouble("perpuluhan")
+                    ));
                 }
-            } catch (IOException e) {
-                System.err.println("Error deleting jemaat with name " + namaHapus + ": " + e.getMessage());
             }
-        } else {
-            System.err.println("Jemaat with name " + namaHapus + " not found.");
+        } catch (SQLException e) {
+            System.err.println("Error fetching jemaat by name: " + e.getMessage());
         }
+        return Optional.empty();
+    }
+
+    @Override
+    public void addJemaat(Jemaat jemaat) {
+        String query = "INSERT INTO jemaat (nama, alamat, perpuluhan) VALUES (?, ?, ?)";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setString(1, jemaat.getNama());
+            ps.setString(2, jemaat.getAlamat());
+            ps.setDouble(3, jemaat.getPerpuluhan());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error adding jemaat: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void updateJemaat(Jemaat jemaat) {
+        String query = "UPDATE jemaat SET nama = ?, alamat = ?, perpuluhan = ? WHERE id = ?";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setString(1, jemaat.getNama());
+            ps.setString(2, jemaat.getAlamat());
+            ps.setDouble(3, jemaat.getPerpuluhan());
+            ps.setInt(4, jemaat.getId());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error updating jemaat: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteJemaat(int id) {
+        String query = "DELETE FROM jemaat WHERE id = ?";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setInt(1, id);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error deleting jemaat: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteJemaatByName(String nama) {
+        String query = "DELETE FROM jemaat WHERE nama = ?";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setString(1, nama);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error deleting jemaat by name: " + e.getMessage());
+        }
+    }
+
+    public void calculateAndUpdatePerpuluhan(int id, double percentage) {
+        String query = "SELECT perpuluhan FROM jemaat WHERE id = ?";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double currentPerpuluhan = rs.getDouble("perpuluhan");
+                    double newPerpuluhan = currentPerpuluhan + (currentPerpuluhan * percentage);
+                    updatePerpuluhan(id, newPerpuluhan);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error calculating perpuluhan: " + e.getMessage());
+        }
+    }
+
+    private void updatePerpuluhan(int id, double newPerpuluhan) {
+        String query = "UPDATE jemaat SET perpuluhan = ? WHERE id = ?";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setDouble(1, newPerpuluhan);
+            ps.setInt(2, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error updating perpuluhan: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void addPersembahan(Persembahan persembahan) {
+        String query = "INSERT INTO persembahan (jumlah) VALUES (?)";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setDouble(1, persembahan.getJumlah());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error adding persembahan: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public double getTotalPersembahan() {
+        String query = "SELECT SUM(jumlah) AS total FROM persembahan";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getDouble("total");
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching total persembahan: " + e.getMessage());
+        }
+        return 0.0;
+    }
+
+    @Override
+    public void addPerbendaharaan(Perbendaharaan perbendaharaan) {
+        String query = "INSERT INTO perbendaharaan (kas_sebelumnya, total_kas, pengeluaran) VALUES (?, ?, ?)";
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query)) {
+
+            ps.setDouble(1, perbendaharaan.getKasSebelumnya());
+            ps.setDouble(2, perbendaharaan.getTotalKas());
+            ps.setDouble(3, perbendaharaan.getPengeluaran());
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            System.err.println("Error adding perbendaharaan: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Perbendaharaan> getAllPerbendaharaan() {
+        List<Perbendaharaan> perbendaharaanList = new ArrayList<>();
+        String query = "SELECT * FROM perbendaharaan";
+
+        try (Connection connection = database.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                perbendaharaanList.add(new Perbendaharaan(
+                        rs.getInt("id"),
+                        rs.getDouble("kas_sebelumnya"),
+                        rs.getDouble("total_kas"),
+                        rs.getDouble("pengeluaran")
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error fetching all perbendaharaan: " + e.getMessage());
+        }
+        return perbendaharaanList;
     }
 }

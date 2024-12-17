@@ -9,10 +9,10 @@ public class Entities {
         private double perpuluhan;
 
         public Jemaat(String nama, String alamat) {
-            this.id = 0;  // Default value for id
+            this.id = 0;
             this.nama = nama;
             this.alamat = alamat;
-            this.perpuluhan = 0.0;  // Default value for perpuluhan
+            this.perpuluhan = 0.0;
         }
 
         public Jemaat(int id, String nama, String alamat, double perpuluhan) {
@@ -50,6 +50,13 @@ public class Entities {
             return perpuluhan;
         }
 
+        public void setPerpuluhan(double perpuluhan) {
+            if (perpuluhan < 0) {
+                throw new IllegalArgumentException("Perpuluhan tidak boleh negatif.");
+            }
+            this.perpuluhan = perpuluhan;
+        }
+
         public void hitungPerpuluhan(double gaji) {
             if (gaji < 0) {
                 throw new IllegalArgumentException("Gaji tidak boleh negatif.");
@@ -68,10 +75,17 @@ public class Entities {
         private double jumlah;
 
         public Persembahan(double jumlah) {
+            if (jumlah < 0) {
+                throw new IllegalArgumentException("Jumlah persembahan tidak boleh negatif.");
+            }
+            this.id = 0;
             this.jumlah = jumlah;
         }
 
         public Persembahan(int id, double jumlah) {
+            if (jumlah < 0) {
+                throw new IllegalArgumentException("Jumlah persembahan tidak boleh negatif.");
+            }
             this.id = id;
             this.jumlah = jumlah;
         }
@@ -89,6 +103,9 @@ public class Entities {
         }
 
         public void setJumlah(double jumlah) {
+            if (jumlah < 0) {
+                throw new IllegalArgumentException("Jumlah persembahan tidak boleh negatif.");
+            }
             this.jumlah = jumlah;
         }
 
@@ -99,18 +116,25 @@ public class Entities {
     }
 
     public static class Perbendaharaan {
-        private int id; // Menyesuaikan dengan tabel database
+        private int id;
         private double kasSebelumnya;
         private double totalKas;
         private double pengeluaran;
 
         public Perbendaharaan(double kasSebelumnya, double totalKas, double pengeluaran) {
+            if (kasSebelumnya < 0 || totalKas < 0 || pengeluaran < 0) {
+                throw new IllegalArgumentException("Nilai kas atau pengeluaran tidak boleh negatif.");
+            }
+            this.id = 0;
             this.kasSebelumnya = kasSebelumnya;
             this.totalKas = totalKas;
             this.pengeluaran = pengeluaran;
         }
 
         public Perbendaharaan(int id, double kasSebelumnya, double totalKas, double pengeluaran) {
+            if (kasSebelumnya < 0 || totalKas < 0 || pengeluaran < 0) {
+                throw new IllegalArgumentException("Nilai kas atau pengeluaran tidak boleh negatif.");
+            }
             this.id = id;
             this.kasSebelumnya = kasSebelumnya;
             this.totalKas = totalKas;
@@ -130,6 +154,9 @@ public class Entities {
         }
 
         public void setKasSebelumnya(double kasSebelumnya) {
+            if (kasSebelumnya < 0) {
+                throw new IllegalArgumentException("Kas sebelumnya tidak boleh negatif.");
+            }
             this.kasSebelumnya = kasSebelumnya;
         }
 
@@ -138,6 +165,9 @@ public class Entities {
         }
 
         public void setTotalKas(double totalKas) {
+            if (totalKas < 0) {
+                throw new IllegalArgumentException("Total kas tidak boleh negatif.");
+            }
             this.totalKas = totalKas;
         }
 
@@ -146,6 +176,9 @@ public class Entities {
         }
 
         public void setPengeluaran(double pengeluaran) {
+            if (pengeluaran < 0) {
+                throw new IllegalArgumentException("Pengeluaran tidak boleh negatif.");
+            }
             this.pengeluaran = pengeluaran;
         }
 

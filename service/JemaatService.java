@@ -1,24 +1,30 @@
 package service;
 
 import entity.Entities;
-
 import java.util.List;
+import java.util.Optional;
 
 public interface JemaatService {
 
-    void tambahJemaat(String nama, String alamat);
+    void addJemaat(String nama, String alamat);
+    void addJemaatWithGaji(String nama, String alamat, double gaji);
 
-    void tambahJemaat(String nama, String alamat, double gaji);
+    void calculateTithe(String nama, double gaji);
+    void calculateTitheById(int idJemaat, double gaji);
 
-    void hitungPerpuluhan(String nama, double gaji);
-    void catatPersembahan(double persembahan);
-    void hitungSaldoPerbendaharaan(double kasSebelumnya, double pengeluaran);
-    List<Entities.Jemaat> tampilkanJemaat();
-    List<String> tampilkanPerbendaharaan();
+    void recordPersembahan(double persembahan);
+
+    void calculateTreasuryBalance(double kasSebelumnya, double pengeluaran);
+
+    List<Entities.Jemaat> getJemaatList();
+    List<Entities.Perbendaharaan> getPerbendaharaanList();
+
     void updateJemaat(String namaLama, String namaBaru, String alamatBaru);
-    void hapusJemaat(String nama);
-    List<String> cariJemaat(String nama);
-    double hitungTotalPersembahan();
+    void updateJemaatById(int idJemaat, String namaBaru, String alamatBaru);
+    void deleteJemaatByName(String nama);
+    void deleteJemaatById(int idJemaat);
 
-    void rekapitulasiPersembahan();
+    Optional<Entities.Jemaat> searchJemaat(String nama);
+    double getTotalPersembahan();
+    void recalculatePersembahan();
 }

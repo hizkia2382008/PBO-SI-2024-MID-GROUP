@@ -1,21 +1,28 @@
 package repository;
 
 import entity.Entities.Jemaat;
+import entity.Entities.Persembahan;
+import entity.Entities.Perbendaharaan;
+
 import java.util.List;
+import java.util.Optional;
 
 public interface JemaatRepository {
 
-    void save(Jemaat jemaat);
+    List<Jemaat> getAllJemaat();
+    Optional<Jemaat> findJemaatById(String id);
+    Optional<Jemaat> findJemaatByName(String nama);
 
-    void update(Jemaat jemaat);
+    Optional<Jemaat> findJemaatById(int id);
 
-    void deleteById(int id);
+    void addJemaat(Jemaat jemaat);
+    void updateJemaat(Jemaat jemaat);
+    void deleteJemaat(int id);
+    void deleteJemaatByName(String nama);
 
-    Jemaat findById(int id);
+    void addPersembahan(Persembahan persembahan);
+    double getTotalPersembahan();
 
-    List<Jemaat> findAll();
-
-    Jemaat findByName(String namaCari);
-
-    void deleteByName(String namaHapus);
+    void addPerbendaharaan(Perbendaharaan perbendaharaan);
+    List<Perbendaharaan> getAllPerbendaharaan();
 }

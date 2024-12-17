@@ -1,222 +1,183 @@
 package service;
 
 import entity.Entities;
-import repository.JemaatRepositoryImpl;
+import repository.JemaatRepository;
 
-import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class JemaatServiceImpl implements JemaatService {
 
-    public static final String JEMAAT_FILE = "jemaat.csv";
-    public static final String PERSEMBAHAN_FILE = "Persembahan.csv";
-    public static final String PERBENDAHARAAN_FILE = "Perbendaharaan.csv";
-    private final JemaatRepositoryImpl jemaatRepository;
+    private final JemaatRepository jemaatRepository;
 
-    public JemaatServiceImpl(JemaatRepositoryImpl jemaatRepository) {
+    public JemaatServiceImpl(JemaatRepository jemaatRepository) {
         this.jemaatRepository = jemaatRepository;
     }
 
     @Override
-    public void tambahJemaat(String nama, String alamat) {
-        Entities.Jemaat jemaat = new Entities.Jemaat(nama, alamat);
-        jemaat.setId(generateId(JEMAAT_FILE));
-        writeToCSV(JEMAAT_FILE, jemaatToCSV(jemaat), true);
+    public void addJemaat(String nama, String alamat) {
+        try {
+            Entities.Jemaat jemaat = new Entities.Jemaat(nama, alamat);
+            jemaat.setPerpuluhan(0);
+            jemaatRepository.addJemaat(jemaat);
+        } catch (Exception e) {
+            System.err.println("Error while adding Jemaat: " + e.getMessage());
+        }
     }
 
     @Override
-    public void tambahJemaat(String nama, String alamat, double gaji) {
-        Entities.Jemaat jemaat = new Entities.Jemaat(nama, alamat);
-        jemaat.setId(generateId(JEMAAT_FILE));
-        jemaat.hitungPerpuluhan(gaji);
-        writeToCSV(JEMAAT_FILE, jemaatToCSV(jemaat), true);
+    public void addJemaatWithGaji(String nama, String alamat, double gaji) {
+        try {
+            Entities.Jemaat jemaat = new Entities.Jemaat(nama, alamat);
+            jemaat.setPerpuluhan(gaji * 0.1);
+            jemaatRepository.addJemaat(jemaat);
+        } catch (Exception e) {
+            System.err.println("Error while adding Jemaat with salary: " + e.getMessage());
+        }
     }
 
     @Override
-    public void hitungPerpuluhan(String nama, double gaji) {
-        List<Entities.Jemaat> jemaatList = parseJemaatList(readFromCSV(JEMAAT_FILE));
-        jemaatList.stream()
-                .filter(jemaat -> jemaat.getNama().equalsIgnoreCase(nama))
-                .forEach(jemaat -> jemaat.hitungPerpuluhan(gaji));
-        writeListToFile(JEMAAT_FILE, jemaatListToCSV(jemaatList));
+    public void calculateTithe(String nama, double gaji) {
+        try {
+            Optional<Entities.Jemaat> jemaatOptional = jemaatRepository.findJemaatByName(nama);
+            jemaatOptional.ifPresent(jemaat -> {
+                jemaat.setPerpuluhan(gaji * 0.1);
+                jemaatRepository.updateJemaat(jemaat);
+            });
+        } catch (Exception e) {
+            System.err.println("Error while calculating tithe for name " + nama + ": " + e.getMessage());
+        }
     }
 
     @Override
-    public void catatPersembahan(double persembahan) {
-        Entities.Persembahan persembahanEntity = new Entities.Persembahan(persembahan);
-        persembahanEntity.setId(generateId(PERSEMBAHAN_FILE));
-        writeToCSV(PERSEMBAHAN_FILE, persembahanToCSV(persembahanEntity), true);
+    public void calculateTitheById(int idJemaat, double gaji) {
+        try {
+            Optional<Entities.Jemaat> jemaatOptional = jemaatRepository.findJemaatById(String.valueOf(idJemaat));
+            jemaatOptional.ifPresent(jemaat -> {
+                jemaat.setPerpuluhan(gaji * 0.1);
+                jemaatRepository.updateJemaat(jemaat);
+            });
+        } catch (Exception e) {
+            System.err.println("Error while calculating tithe for ID " + idJemaat + ": " + e.getMessage());
+        }
     }
 
     @Override
-    public void hitungSaldoPerbendaharaan(double kasSebelumnya, double pengeluaran) {
-        List<Entities.Persembahan> persembahanData = parsePersembahanList(readFromCSV(PERSEMBAHAN_FILE));
-        double totalPersembahan = persembahanData.stream().mapToDouble(Entities.Persembahan::getJumlah).sum();
-        double totalKas = kasSebelumnya + totalPersembahan - pengeluaran;
-
-        Entities.Perbendaharaan perbendaharaan = new Entities.Perbendaharaan(kasSebelumnya, totalKas, pengeluaran);
-        perbendaharaan.setId(generateId(PERBENDAHARAAN_FILE));
-        writeToCSV(PERBENDAHARAAN_FILE, perbendaharaanToCSV(perbendaharaan), true);
+    public void recordPersembahan(double persembahan) {
+        try {
+            Entities.Persembahan persembahanEntity = new Entities.Persembahan(persembahan);
+            jemaatRepository.addPersembahan(persembahanEntity);
+        } catch (Exception e) {
+            System.err.println("Error while recording Persembahan: " + e.getMessage());
+        }
     }
 
     @Override
-    public List<Entities.Jemaat> tampilkanJemaat() {
-        return parseJemaatList(readFromCSV(JEMAAT_FILE));
+    public void calculateTreasuryBalance(double kasSebelumnya, double pengeluaran) {
+        try {
+            double totalPersembahan = jemaatRepository.getTotalPersembahan();
+            double totalKas = kasSebelumnya + totalPersembahan - pengeluaran;
+
+            Entities.Perbendaharaan perbendaharaan = new Entities.Perbendaharaan(kasSebelumnya, totalKas, pengeluaran);
+            jemaatRepository.addPerbendaharaan(perbendaharaan);
+        } catch (Exception e) {
+            System.err.println("Error while calculating treasury balance: " + e.getMessage());
+        }
     }
 
     @Override
-    public List<String> tampilkanPerbendaharaan() {
-        return readFromCSV(PERBENDAHARAAN_FILE);
+    public List<Entities.Jemaat> getJemaatList() {
+        try {
+            return jemaatRepository.getAllJemaat();
+        } catch (Exception e) {
+            System.err.println("Error while retrieving Jemaat list: " + e.getMessage());
+            return null;
+        }
+    }
+
+    @Override
+    public List<Entities.Perbendaharaan> getPerbendaharaanList() {
+        try {
+            return jemaatRepository.getAllPerbendaharaan();
+        } catch (Exception e) {
+            System.err.println("Error while retrieving Perbendaharaan list: " + e.getMessage());
+            return null;
+        }
     }
 
     @Override
     public void updateJemaat(String namaLama, String namaBaru, String alamatBaru) {
-        List<Entities.Jemaat> jemaatList = parseJemaatList(readFromCSV(JEMAAT_FILE));
-        jemaatList.stream()
-                .filter(jemaat -> jemaat.getNama().equals(namaLama))
-                .forEach(jemaat -> {
-                    jemaat.setNama(namaBaru);
-                    jemaat.setAlamat(alamatBaru);
-                });
-        writeListToFile(JEMAAT_FILE, jemaatListToCSV(jemaatList));
-    }
-
-    @Override
-    public void hapusJemaat(String nama) {
-        List<Entities.Jemaat> jemaatList = parseJemaatList(readFromCSV(JEMAAT_FILE));
-        jemaatList.removeIf(jemaat -> jemaat.getNama().equals(nama));
-        writeListToFile(JEMAAT_FILE, jemaatListToCSV(jemaatList));
-    }
-
-    @Override
-    public List<String> cariJemaat(String nama) {
-        List<Entities.Jemaat> jemaatList = parseJemaatList(readFromCSV(JEMAAT_FILE));
-        List<String> result = new ArrayList<>();
-        jemaatList.stream()
-                .filter(jemaat -> jemaat.getNama().equalsIgnoreCase(nama))
-                .forEach(jemaat -> result.add(jemaatToCSV(jemaat)));
-        return result;
-    }
-
-    @Override
-    public double hitungTotalPersembahan() {
-        List<Entities.Persembahan> persembahanData = parsePersembahanList(readFromCSV(PERSEMBAHAN_FILE));
-        return persembahanData.stream().mapToDouble(Entities.Persembahan::getJumlah).sum();
-    }
-
-    @Override
-    public void rekapitulasiPersembahan() {
-        double totalPersembahan = hitungTotalPersembahan();
-        System.out.println("Total Persembahan: " + totalPersembahan);
-    }
-
-    private void writeToCSV(String fileName, String data, boolean append) {
         try {
-            ensureFileExists(fileName);
-            try (FileWriter writer = new FileWriter(fileName, append)) {
-                writer.write(data + "\n");
-            }
-        } catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat menulis ke file: " + fileName);
+            Optional<Entities.Jemaat> jemaatOptional = jemaatRepository.findJemaatByName(namaLama);
+            jemaatOptional.ifPresent(jemaat -> {
+                jemaat.setNama(namaBaru);
+                jemaat.setAlamat(alamatBaru);
+                jemaatRepository.updateJemaat(jemaat);
+            });
+        } catch (Exception e) {
+            System.err.println("Error while updating Jemaat by name: " + e.getMessage());
         }
     }
 
-    private List<String> readFromCSV(String fileName) {
-        List<String> data = new ArrayList<>();
+    @Override
+    public void updateJemaatById(int idJemaat, String namaBaru, String alamatBaru) {
         try {
-            ensureFileExists(fileName);
-            try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    data.add(line);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat membaca file: " + fileName);
-        }
-        return data;
-    }
-
-    private void writeListToFile(String fileName, List<String> data) {
-        try (FileWriter writer = new FileWriter(fileName)) {
-            for (String line : data) {
-                writer.write(line + "\n");
-            }
-        } catch (IOException e) {
-            System.out.println("Terjadi kesalahan saat menulis ke file: " + fileName);
+            Optional<Entities.Jemaat> jemaatOptional = jemaatRepository.findJemaatById(String.valueOf(idJemaat));
+            jemaatOptional.ifPresent(jemaat -> {
+                jemaat.setNama(namaBaru);
+                jemaat.setAlamat(alamatBaru);
+                jemaatRepository.updateJemaat(jemaat);
+            });
+        } catch (Exception e) {
+            System.err.println("Error while updating Jemaat by ID: " + e.getMessage());
         }
     }
 
-    private void ensureFileExists(String fileName) {
-        File file = new File(fileName);
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                System.out.println("Error creating file: " + fileName);
-            }
+    @Override
+    public void deleteJemaatByName(String nama) {
+        try {
+            jemaatRepository.deleteJemaatByName(nama);
+        } catch (Exception e) {
+            System.err.println("Error while deleting Jemaat by name: " + e.getMessage());
         }
     }
 
-    private List<Entities.Jemaat> parseJemaatList(List<String> data) {
-        List<Entities.Jemaat> jemaatList = new ArrayList<>();
-        for (String line : data) {
-            String[] parts = line.split(",");
-            Entities.Jemaat jemaat = new Entities.Jemaat(
-                    Integer.parseInt(parts[0]),
-                    parts[1],
-                    parts[2],
-                    Double.parseDouble(parts[3])
-            );
-            jemaatList.add(jemaat);
+    @Override
+    public void deleteJemaatById(int idJemaat) {
+        try {
+            jemaatRepository.deleteJemaat(idJemaat);
+        } catch (Exception e) {
+            System.err.println("Error while deleting Jemaat by ID: " + e.getMessage());
         }
-        return jemaatList;
     }
 
-    private List<Entities.Persembahan> parsePersembahanList(List<String> data) {
-        List<Entities.Persembahan> persembahanList = new ArrayList<>();
-        for (String line : data) {
-            String[] parts = line.split(",");
-            Entities.Persembahan persembahan = new Entities.Persembahan(
-                    Integer.parseInt(parts[0]),
-                    Double.parseDouble(parts[1])
-            );
-            persembahanList.add(persembahan);
+    @Override
+    public Optional<Entities.Jemaat> searchJemaat(String nama) {
+        try {
+            return jemaatRepository.findJemaatByName(nama);
+        } catch (Exception e) {
+            System.err.println("Error while searching Jemaat: " + e.getMessage());
+            return Optional.empty();
         }
-        return persembahanList;
     }
 
-    private String jemaatToCSV(Entities.Jemaat jemaat) {
-        return jemaat.getId() + "," + jemaat.getNama() + "," + jemaat.getAlamat() + "," + jemaat.getPerpuluhan();
-    }
-
-    private List<String> jemaatListToCSV(List<Entities.Jemaat> jemaatList) {
-        List<String> data = new ArrayList<>();
-        for (Entities.Jemaat jemaat : jemaatList) {
-            data.add(jemaatToCSV(jemaat));
+    @Override
+    public double getTotalPersembahan() {
+        try {
+            return jemaatRepository.getTotalPersembahan();
+        } catch (Exception e) {
+            System.err.println("Error while getting total Persembahan: " + e.getMessage());
+            return 0.0;
         }
-        return data;
     }
 
-    private String persembahanToCSV(Entities.Persembahan persembahan) {
-        return persembahan.getId() + "," + persembahan.getJumlah();
-    }
-
-    private String perbendaharaanToCSV(Entities.Perbendaharaan perbendaharaan) {
-        return perbendaharaan.getId() + ","
-                + perbendaharaan.getKasSebelumnya() + ","
-                + perbendaharaan.getTotalKas() + ","
-                + perbendaharaan.getPengeluaran();
-    }
-
-    private int generateId(String fileName) {
-        List<String> data = readFromCSV(fileName);
-        if (data.isEmpty()) {
-            return 1;
+    @Override
+    public void recalculatePersembahan() {
+        try {
+            double totalPersembahan = getTotalPersembahan();
+            System.out.println("Total Persembahan: " + totalPersembahan);
+        } catch (Exception e) {
+            System.err.println("Error while recalculating Persembahan: " + e.getMessage());
         }
-        String lastLine = data.get(data.size() - 1);
-        String[] parts = lastLine.split(",");
-        return Integer.parseInt(parts[0]) + 1;
     }
 }
