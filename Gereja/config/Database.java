@@ -1,4 +1,4 @@
-package config;
+package Gereja.config;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -28,7 +28,7 @@ public class Database {
     }
 
 
-    private void setup() {
+    public void setup() {
         String mysqlConnUrlTemplate = "jdbc:mysql://%s:%s/%s";
         try {
             Class.forName("com.mysql.jdbc.Driver");

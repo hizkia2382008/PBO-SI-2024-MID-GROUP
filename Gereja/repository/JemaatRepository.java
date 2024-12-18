@@ -1,8 +1,8 @@
-package repository;
+package Gereja.repository;
 
-import entity.Entities.Jemaat;
-import entity.Entities.Persembahan;
-import entity.Entities.Perbendaharaan;
+import Gereja.entity.Entities.Jemaat;
+import Gereja.entity.Entities.Persembahan;
+import Gereja.entity.Entities.Perbendaharaan;
 
 import java.util.List;
 import java.util.Optional;

@@ -1,6 +1,6 @@
-package service;
+package Gereja.service;
 
-import entity.Entities;
+import Gereja.entity.Entities;
 import java.util.List;
 import java.util.Optional;
 

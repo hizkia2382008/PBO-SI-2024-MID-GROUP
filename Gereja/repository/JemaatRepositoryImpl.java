@@ -1,15 +1,17 @@
-package repository;
+package Gereja.repository;
 
-import config.Database;
-import entity.Entities.Jemaat;
-import entity.Entities.Persembahan;
-import entity.Entities.Perbendaharaan;
+import Gereja.config.Database;
+import Gereja.entity.Entities.Jemaat;
+import Gereja.entity.Entities.Persembahan;
+import Gereja.entity.Entities.Perbendaharaan;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class JemaatRepositoryImpl implements JemaatRepository {
 
     private final Database database;

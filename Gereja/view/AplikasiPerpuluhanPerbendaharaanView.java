@@ -1,6 +1,6 @@
-package view;
+package Gereja.view;
 
-import entity.Entities.Jemaat;
+import Gereja.entity.Entities.Jemaat;
 import java.util.List;
 import java.util.Optional;
 

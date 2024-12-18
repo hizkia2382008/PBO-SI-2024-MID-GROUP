@@ -1,11 +1,13 @@
-package service;
+package Gereja.service;
 
-import entity.Entities;
-import repository.JemaatRepository;
+import Gereja.entity.Entities;
+import Gereja.repository.JemaatRepository;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
+@Component
 public class JemaatServiceImpl implements JemaatService {
 
     private final JemaatRepository jemaatRepository;

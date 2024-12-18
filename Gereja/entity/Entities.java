@@ -1,4 +1,4 @@
-package entity;
+package Gereja.entity;
 
 public class Entities {
 

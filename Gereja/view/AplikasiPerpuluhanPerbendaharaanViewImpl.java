@@ -1,14 +1,16 @@
-package view;
+package Gereja.view;
 
-import entity.Entities;
-import entity.Entities.Jemaat;
-import service.JemaatService;
-import service.JemaatServiceImpl;
+import Gereja.entity.Entities;
+import Gereja.entity.Entities.Jemaat;
+import Gereja.service.JemaatService;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+
+@Component
 public class AplikasiPerpuluhanPerbendaharaanViewImpl implements AplikasiPerpuluhanPerbendaharaanView {
 
     private final Scanner scanner = new Scanner(System.in);
